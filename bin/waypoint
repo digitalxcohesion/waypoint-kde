@@ -1,0 +1,187 @@
+#!/usr/bin/env bash
+# waypoint — switch the whole Waypoint setup between dark and light.
+# Usage: waypoint dark|light      (whole theme)
+#        waypoint dim on|off|N    (fade unfocused windows; N = strength 0-100; Dark 20, Light 10)
+#        waypoint panel [--apply|--restore]   (Waypoint top panel; preview without --apply)
+#        waypoint panel --apply --fancy       (same panel, styled by Panel Colorizer: "Waypoint Fancy")
+#        waypoint dark|light --layout         (theme + rebuild the Waypoint top panel)
+#        waypoint sync                        (match Kvantum, Konsole and Fastfetch to the current
+#                                              colour scheme; does nothing unless it is Waypoint's)
+#        waypoint watch                       (run sync whenever the colour scheme changes, e.g. when
+#                                              you pick Waypoint Dark/Light in System Settings;
+#                                              started at login by ~/.config/autostart/waypoint-sync.desktop)
+set -euo pipefail
+v="${1:-}"
+if [ "$v" = "sync" ]; then
+  # A Global Theme can't choose the Kvantum theme, Konsole's profile or Fastfetch colours;
+  # this does, but only when a Waypoint colour scheme is active.
+  Q=0; [ "${2:-}" = "--quiet" ] && Q=1
+  say() { [ $Q = 1 ] || echo "$@"; }
+  RD=kreadconfig6; command -v $RD >/dev/null 2>&1 || RD=kreadconfig5
+  WR=kwriteconfig6; command -v $WR >/dev/null 2>&1 || WR=kwriteconfig5
+  CS="$($RD --file kdeglobals --group General --key ColorScheme 2>/dev/null || true)"
+  case "$CS" in
+    Waypoint-Dark)  V=dark;  KV=WaypointDark;  KP=WaypointDark.profile ;;
+    Waypoint-Light) V=light; KV=WaypointLight; KP=WaypointLight.profile ;;
+    *) say "Colour scheme is '$CS', not Waypoint's: nothing to do."; exit 0 ;;
+  esac
+  STYLE="$($RD --file kdeglobals --group KDE --key widgetStyle 2>/dev/null || true)"
+  KVCONF="${XDG_CONFIG_HOME:-$HOME/.config}/Kvantum/kvantum.kvconfig"
+  if [ "$STYLE" = "kvantum" ] && command -v kvantummanager >/dev/null 2>&1; then
+    CUR="$($RD --file "$KVCONF" --group General --key theme 2>/dev/null || true)"
+    if [ "$CUR" != "$KV" ]; then
+      kvantummanager --set "$KV" >/dev/null 2>&1 && say "Kvantum theme -> $KV (newly opened apps use it)"
+    fi
+  fi
+  if [ -f "${XDG_DATA_HOME:-$HOME/.local/share}/konsole/$KP" ]; then
+    CUR="$($RD --file konsolerc --group "Desktop Entry" --key DefaultProfile 2>/dev/null || true)"
+    case "$CUR" in   # only swap between the Waypoint profiles; a profile of your own is left alone
+      ""|WaypointDark.profile|WaypointLight.profile)
+        [ "$CUR" != "$KP" ] && $WR --file konsolerc --group "Desktop Entry" --key DefaultProfile "$KP" && say "Konsole profile -> $KP" ;;
+    esac
+  fi
+  FFC="${XDG_DATA_HOME:-$HOME/.local/share}/waypoint/waypoint-fastfetch.py"
+  if [ -f "$FFC" ] && command -v python3 >/dev/null 2>&1; then
+    python3 -I "$FFC" --if-applied --apply --quiet --variant "$V" | grep -q '^Written' && say "Fastfetch colours -> $V" || true
+  fi
+  exit 0
+fi
+if [ "$v" = "watch" ]; then
+  command -v dbus-monitor >/dev/null 2>&1 || { echo "waypoint watch needs dbus-monitor (package: dbus)." >&2; exit 1; }
+  SELF="$(readlink -f "$0")"
+  if command -v flock >/dev/null 2>&1; then          # one watcher per session
+    exec 9>"${XDG_RUNTIME_DIR:-/tmp}/waypoint-watch.lock"
+    flock -n 9 || exit 0
+  fi
+  "$SELF" sync --quiet || true
+  dbus-monitor --session \
+    "type='signal',interface='org.kde.KGlobalSettings',member='notifyChange'" \
+    "type='signal',interface='org.kde.kconfig.notify',member='ConfigChanged',path='/kdeglobals'" 2>/dev/null |
+  while IFS= read -r line; do
+    case "$line" in
+      *member=notifyChange*|*member=ConfigChanged*)
+        sleep 1
+        while IFS= read -r -t 1 _; do :; done   # one sync per burst of changes
+        "$SELF" sync --quiet || true ;;
+    esac
+  done
+  exit 0
+fi
+if [ "$v" = "dim" ]; then
+  case "${2:-}" in
+    off) kwriteconfig6 --file kwinrc --group Plugins --key diminactiveEnabled false ;;
+    on)  kwriteconfig6 --file kwinrc --group Plugins --key diminactiveEnabled true ;;
+    [0-9]*) kwriteconfig6 --file kwinrc --group Effect-diminactive --key Strength "$2"
+            kwriteconfig6 --file kwinrc --group Plugins --key diminactiveEnabled true ;;
+    *) echo "usage: waypoint dim on|off|<strength 0-100>" >&2; exit 2 ;;
+  esac
+  for q in qdbus6 qdbus; do command -v $q >/dev/null 2>&1 && { $q org.kde.KWin /KWin reconfigure >/dev/null 2>&1; break; }; done
+  echo "Dim Inactive: ${2}"; exit 0
+fi
+if [ "$v" = "panel" ]; then
+  # waypoint panel            preview
+  # waypoint panel --apply    back up the panel config, then build the Waypoint top panel
+  # waypoint panel --restore  put back the most recent backup
+  JS="${XDG_DATA_HOME:-$HOME/.local/share}/waypoint/waypoint-panel.js"
+  CONF="${XDG_CONFIG_HOME:-$HOME/.config}"
+  FILES=(plasma-org.kde.plasma.desktop-appletsrc plasmashellrc)
+  QDBUS=""; for q in qdbus6 qdbus; do command -v $q >/dev/null 2>&1 && { QDBUS=$q; break; }; done
+  FANCY=0
+  if [ "${3:-}" = "--fancy" ] || [ "${2:-}" = "--fancy" ]; then FANCY=1; fi
+  PRESET="$CONF/panel-colorizer/presets/Waypoint Fancy/settings.json"
+  case "${2:-}" in
+    --apply)
+      [ -f "$JS" ] || { echo "Missing $JS — run the Waypoint installer first." >&2; exit 1; }
+      [ -n "$QDBUS" ] || { echo "qdbus6 not found." >&2; exit 1; }
+      # Widgets installed while Plasma is running aren't visible to it until it restarts.
+      on_disk() { for d in /usr/share/plasma/plasmoids "${XDG_DATA_HOME:-$HOME/.local/share}/plasma/plasmoids"; do [ -d "$d/$1" ] && return 0; done; return 1; }
+      known() { $QDBUS org.kde.plasmashell /PlasmaShell org.kde.PlasmaShell.evaluateScript "print(knownWidgetTypes.indexOf('$1') >= 0)" 2>/dev/null | grep -q true; }
+      stale=0
+      IDS="org.kde.plasma.kvitals"; [ $FANCY = 1 ] && IDS="$IDS luisbocanegra.panel.colorizer"
+      for id in $IDS; do
+        if on_disk "$id" && ! known "$id"; then stale=1; fi
+      done
+      if [ $stale = 1 ]; then
+        echo "Restarting Plasma so it picks up newly installed widgets..."
+        systemctl --user restart plasma-plasmashell.service
+        sleep 2
+        for i in $(seq 1 30); do $QDBUS org.kde.plasmashell /PlasmaShell >/dev/null 2>&1 && break; sleep 1; done
+        sleep 3   # let the shell finish loading its panels before we edit them
+      fi
+      on_disk org.kde.plasma.kvitals || echo "Note: KVitals is not installed, so the panel will have no stats (installer: ./install.sh --apply --kvitals)."
+      PRE=""
+      if [ $FANCY = 1 ]; then
+        [ -f "$PRESET" ] || { echo "Missing $PRESET — run the Waypoint installer first." >&2; exit 1; }
+        on_disk luisbocanegra.panel.colorizer || echo "Note: Panel Colorizer is not installed, so the panel will be plain (installer: ./install.sh --apply --panel-colorizer)."
+        PRE="var WAYPOINT_FANCY = $(cat "$PRESET");"
+      fi
+      B="$HOME/waypoint-backup-panel-$(date +%Y%m%d-%H%M%S)"; mkdir -p "$B"
+      for f in "${FILES[@]}"; do [ -f "$CONF/$f" ] && cp -a "$CONF/$f" "$B/"; done
+      echo "Panel config backed up to $B"
+      $QDBUS org.kde.plasmashell /PlasmaShell org.kde.PlasmaShell.evaluateScript "$PRE$(cat "$JS")"
+      echo "Done. Undo with: waypoint panel --restore" ;;
+    --restore)
+      B="$(ls -d "$HOME"/waypoint-backup-panel-* 2>/dev/null | sort | tail -1)"
+      [ -n "$B" ] || { echo "No panel backup found." >&2; exit 1; }
+      echo "Restoring panel from $B"
+      systemctl --user stop plasma-plasmashell.service
+      for f in "${FILES[@]}"; do [ -f "$B/$f" ] && cp -a "$B/$f" "$CONF/$f"; done
+      systemctl --user start plasma-plasmashell.service
+      echo "Restored." ;;
+    ""|--fancy)
+      echo "waypoint panel --apply will:"
+      echo "  1. back up your panel settings to ~/waypoint-backup-panel-<time>/"
+      echo "  2. remove the panel(s) on the TOP edge of your main screen, and any Waypoint panel on other screens"
+      echo "     (your other panels are kept)"
+      echo "  3. add a 36 px top panel on your main screen: Launcher | Task Manager | Clock (centre) | KVitals stats | System Tray"
+      echo "  With --fancy also: Panel Colorizer's \"Waypoint Fancy\" style (a floating, see-through black bar with"
+      echo "  each group on a darker section). Needs the Panel Colorizer widget (./install.sh --apply --panel-colorizer)."
+      echo "Undo any time with: waypoint panel --restore" ;;
+    *) echo "usage: waypoint panel [--apply [--fancy]|--restore]" >&2; exit 2 ;;
+  esac
+  exit 0
+fi
+case "$v" in
+  dark)  ID=org.waypoint.dark;  KV=WaypointDark;  KP="WaypointDark.profile";  DIM=20 ;;
+  light) ID=org.waypoint.light; KV=WaypointLight; KP="WaypointLight.profile"; DIM=10 ;;
+  *) echo "usage: waypoint dark|light   |   waypoint dim on|off|N   |   waypoint panel [--apply [--fancy]|--restore]   |   waypoint sync   |   waypoint watch" >&2; exit 2 ;;
+esac
+echo "Applying Global Theme $ID ..."
+if [ "${2:-}" = "--layout" ]; then
+  # also rebuild the Waypoint top panel from the Global Theme's layout (replaces your panels)
+  B="$HOME/waypoint-backup-panel-$(date +%Y%m%d-%H%M%S)"; mkdir -p "$B"
+  for f in plasma-org.kde.plasma.desktop-appletsrc plasmashellrc; do
+    [ -f "${XDG_CONFIG_HOME:-$HOME/.config}/$f" ] && cp -a "${XDG_CONFIG_HOME:-$HOME/.config}/$f" "$B/"
+  done
+  echo "Panel config backed up to $B (undo: waypoint panel --restore)"
+  plasma-apply-lookandfeel --apply "$ID" --resetLayout
+else
+  plasma-apply-lookandfeel --apply "$ID"
+fi
+if command -v kvantummanager >/dev/null 2>&1; then
+  echo "Kvantum theme -> $KV"
+  kvantummanager --set "$KV" >/dev/null 2>&1 || echo "  (could not set Kvantum theme; pick $KV in Kvantum Manager)"
+fi
+if [ -f "$HOME/.local/share/konsole/$KP" ]; then
+  echo "Konsole default profile -> $KP"
+  kwriteconfig6 --file konsolerc --group "Desktop Entry" --key DefaultProfile "$KP"
+fi
+# Fastfetch: keep your design, switch its colours to this variant (only if you set up
+# Waypoint's Fastfetch colours before; see fastfetch/install-fastfetch-colours.sh)
+FFC="${XDG_DATA_HOME:-$HOME/.local/share}/waypoint/waypoint-fastfetch.py"
+if [ -f "$FFC" ] && command -v python3 >/dev/null 2>&1; then
+  python3 -I "$FFC" --if-applied --apply --quiet --variant "$v" | grep -q '^Written' && echo "Fastfetch colours -> $v" || true
+fi
+# Fade windows that are not in focus (KWin's "Dim Inactive" effect). Undo: waypoint dim off
+# (strength matches the title bars' inactive colour: Dark 20, Light 10)
+echo "Dimming inactive windows (KWin Dim Inactive, strength $DIM)"
+kwriteconfig6 --file kwinrc --group Plugins --key diminactiveEnabled true
+kwriteconfig6 --file kwinrc --group Effect-diminactive --key Strength "$DIM"
+for q in qdbus6 qdbus; do command -v $q >/dev/null 2>&1 && { $q org.kde.KWin /KWin reconfigure >/dev/null 2>&1; break; }; done
+# The panel's own right-click menus are drawn by plasmashell with the app style; restart it so
+# they use the matching Kvantum theme instead of whatever style it started with.
+if systemctl --user --quiet is-active plasma-plasmashell.service 2>/dev/null; then
+  echo "Restarting the panel so its menus pick up the app style"
+  systemctl --user restart plasma-plasmashell.service
+fi
+echo "Done. Reopen apps (Dolphin, Konsole, System Settings) to pick up the app style."

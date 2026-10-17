@@ -1,0 +1,36 @@
+Waypoint for KDE Plasma 6
+Copyright (C) 2026 DigitalCohesion
+
+Waypoint is made of several parts. Each part keeps the licence of the work it is based on;
+everything created for Waypoint is licensed under the GNU General Public License, version 3
+or (at your option) any later version.
+
+Part                                   Based on                            Licence
+-------------------------------------  ----------------------------------  -------------------
+Global Themes (look-and-feel), splash  original work                       GPL-3.0-or-later
+Colour schemes, Konsole schemes        original work                       GPL-3.0-or-later
+Window decorations (Aurorae)           original work                       GPL-3.0-or-later
+Install scripts, `waypoint`, Fastfetch
+  colour tool, panel scripts, Panel
+  Colorizer presets                    original work                       GPL-3.0-or-later
+Plasma Styles (plasma/desktoptheme)    KDE Breeze Plasma Style             LGPL-2.0-or-later
+Folder icons (icons/Waypoint)          KDE Breeze icons                    LGPL-3.0-or-later
+Cursors                                KDE Breeze cursors                  GPL-2.0-or-later
+                                                                           (licence text in each
+                                                                           cursor folder: COPYING)
+Kvantum style                          Kvantum KvArc / KvArcDark           GPL-3.0
+                                       by Pedram Pourang (Tsu Jan)         (licence text in each
+                                                                           Kvantum folder: COPYING)
+Wallpaper "Crescent"                   original artwork (AI-assisted)      CC BY-SA 4.0
+
+Breeze is part of KDE Plasma, (C) the KDE Visual Design Group and contributors.
+Kvantum and KvArc: https://github.com/tsujan/Kvantum
+
+GPL-3.0:      https://www.gnu.org/licenses/gpl-3.0.html
+GPL-2.0:      https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+LGPL-3.0:     https://www.gnu.org/licenses/lgpl-3.0.html
+LGPL-2.0:     https://www.gnu.org/licenses/old-licenses/lgpl-2.0.html
+CC BY-SA 4.0: https://creativecommons.org/licenses/by-sa/4.0/
+
+This theme is distributed WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.

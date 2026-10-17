@@ -1,0 +1,17 @@
+{
+  "KPackageStructure": "Plasma/LookAndFeel",
+  "KPlugin": {
+    "Id": "org.waypoint.light",
+    "Name": "Waypoint Light",
+    "Description": "Graphite and machined amber, light variant: Plasma Style, colours, title bars, icons, cursors, splash and wallpaper.",
+    "Authors": [
+      {
+        "Name": "DigitalCohesion"
+      }
+    ],
+    "License": "GPL-3.0-or-later",
+    "Version": "2.9.0",
+    "Website": ""
+  },
+  "X-Plasma-APIVersion": "2"
+}

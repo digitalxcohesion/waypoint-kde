@@ -1,0 +1,6 @@
+*.png binary
+*.jpg binary
+*.svgz binary
+cursors/*/cursors/* binary
+*.sh text eol=lf
+bin/waypoint text eol=lf

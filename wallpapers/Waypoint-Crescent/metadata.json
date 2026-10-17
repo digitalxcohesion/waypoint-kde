@@ -1,0 +1,13 @@
+{
+  "KPlugin": {
+    "Id": "Waypoint-Crescent",
+    "Name": "Waypoint — Crescent",
+    "Authors": [
+      {
+        "Name": "DigitalCohesion"
+      }
+    ],
+    "Version": "2.9.0",
+    "License": "CC-BY-SA-4.0"
+  }
+}

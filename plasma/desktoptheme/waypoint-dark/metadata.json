@@ -1,0 +1,22 @@
+{
+  "KPlugin": {
+    "Authors": [
+      {
+        "Name": "DigitalCohesion"
+      },
+      {
+        "Name": "Based on Breeze by the KDE Visual Design Group"
+      }
+    ],
+    "Category": "",
+    "Description": "Waypoint dark Plasma theme with restrained amber highlights.",
+    "EnabledByDefault": true,
+    "Id": "waypoint-dark",
+    "License": "LGPL-2.0-or-later",
+    "Name": "Waypoint Dark",
+    "Version": "2.9.0",
+    "Website": ""
+  },
+  "X-Plasma-API": "5.0",
+  "KPackageStructure": "Plasma/Theme"
+}
