@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.1.2
+- Kvantum: "Transparent Dolphin view" is on by default (Dolphin's file view is translucent too)
+
 ## 0.1.1
 - Waypoint Fancy (Panel Colorizer): lighter bar (black at 30%, was 55%) and slimmer sections
   (22 px, 4 px inside the bar). Re-apply with: waypoint panel --apply --fancy
