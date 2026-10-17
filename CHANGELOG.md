@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.3
+- Top panel: the task manager is replaced by app shortcuts (Plasma's Quick Launch): System Settings,
+  Kate, Dolphin, Brave, Firefox and Konsole, skipping any that aren't installed (the default browser
+  is used if neither Brave nor Firefox is). Drag apps onto it, or right-click it, to change the list.
+  Want open windows back? `waypoint panel --apply --tasks`
+- The panel command also clears away Waypoint panels made with app shortcuts on other screens
+
 ## 0.1.2
 - Kvantum: "Transparent Dolphin view" is on by default (Dolphin's file view is translucent too)
 
