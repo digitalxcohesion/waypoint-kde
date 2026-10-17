@@ -1,6 +1,6 @@
 # Changelog
 
-## 2.9.0 — first public release
+## 0.1.0 — first public release
 - Global Themes Waypoint Dark and Waypoint Light with splash screens
 - Plasma Styles with flat task buttons; colour schemes; Aurorae window decorations with rounded
   top corners, an amber focus border and an amber close button

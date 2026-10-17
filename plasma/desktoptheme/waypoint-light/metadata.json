@@ -14,7 +14,7 @@
     "Id": "waypoint-light",
     "License": "LGPL-2.0-or-later",
     "Name": "Waypoint Light",
-    "Version": "2.9.0",
+    "Version": "0.1.0",
     "Website": ""
   },
   "X-Plasma-API": "5.0",
