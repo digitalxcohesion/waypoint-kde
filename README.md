@@ -1,4 +1,4 @@
-# Waypoint for KDE Plasma 6 — 0.1.0
+# Waypoint for KDE Plasma 6 — 0.1.1
 
 Graphite surfaces, steel detailing and machined-amber focus, in Dark and Light.
 By DigitalCohesion.
@@ -21,7 +21,7 @@ By DigitalCohesion.
 - **`waypoint`**: one command to switch everything between Dark and Light
 
 ## Install (no root needed)
-    cd Waypoint-KDE-0.1.0
+    cd Waypoint-KDE-0.1.1
     ./install.sh            # preview: shows what will be installed and backed up; changes nothing
     ./install.sh --apply    # install; anything it replaces is moved to ~/waypoint-backup-<time>/
     ~/.local/bin/waypoint dark          # or: light

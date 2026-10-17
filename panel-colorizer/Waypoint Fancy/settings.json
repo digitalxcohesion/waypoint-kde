@@ -10,7 +10,7 @@
           "enabled": true,
           "lightnessValue": 0.5,
           "saturationValue": 0.5,
-          "alpha": 0.55,
+          "alpha": 0.3,
           "systemColor": "backgroundColor",
           "systemColorSet": "View",
           "custom": "#000000",
@@ -1604,8 +1604,8 @@
           "side": {
             "left": 8,
             "right": 8,
-            "top": 2,
-            "bottom": 2
+            "top": 4,
+            "bottom": 4
           }
         },
         "spacing": 6,

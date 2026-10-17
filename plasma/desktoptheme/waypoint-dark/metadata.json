@@ -14,7 +14,7 @@
     "Id": "waypoint-dark",
     "License": "LGPL-2.0-or-later",
     "Name": "Waypoint Dark",
-    "Version": "0.1.0",
+    "Version": "0.1.1",
     "Website": ""
   },
   "X-Plasma-API": "5.0",
