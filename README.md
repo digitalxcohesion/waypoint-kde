@@ -37,7 +37,7 @@ Options for the installer:
 | `--no-fastfetch` | leave Fastfetch alone |
 | `--no-autosync` | don't add the login helper described below |
 
-On distributions without the AUR, install KVitals and Panel Colorizer from Plasma instead:
+On distributions **without** the AUR, install KVitals and Panel Colorizer from Plasma instead:
 right-click the panel → Add or Manage Widgets → Get New → Download New Plasma Widgets.
 
 For the app style, install **Kvantum** with your package manager
