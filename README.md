@@ -1,4 +1,4 @@
-# Waypoint for KDE Plasma 6 — 0.1.3
+# Waypoint for KDE Plasma 6 — 0.1.2
 
 Graphite surfaces, steel detailing and machined-amber focus, in Dark and Light.
 By DigitalCohesion.
@@ -15,13 +15,13 @@ By DigitalCohesion.
 - **Wallpaper** "Crescent": mountains and lake, a crescent moon at dusk for Dark and a low sun for Light;
   sizes 1920×1080, 2560×1440, 3840×2160 and 3440×1440 (ultrawide)
 - **Konsole** colour schemes and profiles
-- **Top panel**: launcher, app shortcuts, centred clock, KVitals system stats and system tray, with an
+- **Top panel**: launcher, task manager, centred clock, KVitals system stats and system tray, with an
   optional "Fancy" look via the Panel Colorizer widget
 - **Fastfetch colours**: recolours your own Fastfetch setup, keeping its layout and logo
 - **`waypoint`**: one command to switch everything between Dark and Light
 
 ## Install (no root needed)
-    cd Waypoint-KDE-0.1.3
+    cd Waypoint-KDE-0.1.2
     ./install.sh            # preview: shows what will be installed and backed up; changes nothing
     ./install.sh --apply    # install; anything it replaces is moved to ~/waypoint-backup-<time>/
     ~/.local/bin/waypoint dark          # or: light
@@ -47,7 +47,6 @@ For the app style, install **Kvantum** with your package manager
     waypoint dark | light               switch the whole theme (also Kvantum, Konsole and Fastfetch)
     waypoint panel                      preview the top panel
     waypoint panel --apply [--fancy]    build the top panel on your main screen (backs up first)
-    waypoint panel --apply --tasks      same, with the task manager (open windows) instead of app shortcuts
     waypoint panel --restore            put your previous panels back
     waypoint dim on | off | N           fade unfocused windows (N = 0–100; Dark 20, Light 10)
     waypoint sync                       match Kvantum, Konsole and Fastfetch to the current Waypoint variant

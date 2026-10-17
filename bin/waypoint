@@ -4,7 +4,6 @@
 #        waypoint dim on|off|N    (fade unfocused windows; N = strength 0-100; Dark 20, Light 10)
 #        waypoint panel [--apply|--restore]   (Waypoint top panel; preview without --apply)
 #        waypoint panel --apply --fancy       (same panel, styled by Panel Colorizer: "Waypoint Fancy")
-#        waypoint panel --apply --tasks       (task manager with open windows instead of app shortcuts)
 #        waypoint dark|light --layout         (theme + rebuild the Waypoint top panel)
 #        waypoint sync                        (match Kvantum, Konsole and Fastfetch to the current
 #                                              colour scheme; does nothing unless it is Waypoint's)
@@ -87,10 +86,8 @@ if [ "$v" = "panel" ]; then
   CONF="${XDG_CONFIG_HOME:-$HOME/.config}"
   FILES=(plasma-org.kde.plasma.desktop-appletsrc plasmashellrc)
   QDBUS=""; for q in qdbus6 qdbus; do command -v $q >/dev/null 2>&1 && { QDBUS=$q; break; }; done
-  FANCY=0; TASKS=0
-  for a in "${@:2}"; do
-    case "$a" in --fancy) FANCY=1 ;; --tasks) TASKS=1 ;; esac
-  done
+  FANCY=0
+  if [ "${3:-}" = "--fancy" ] || [ "${2:-}" = "--fancy" ]; then FANCY=1; fi
   PRESET="$CONF/panel-colorizer/presets/Waypoint Fancy/settings.json"
   case "${2:-}" in
     --apply)
@@ -113,11 +110,10 @@ if [ "$v" = "panel" ]; then
       fi
       on_disk org.kde.plasma.kvitals || echo "Note: KVitals is not installed, so the panel will have no stats (installer: ./install.sh --apply --kvitals)."
       PRE=""
-      [ $TASKS = 1 ] && PRE="var WAYPOINT_TASKS = true;"
       if [ $FANCY = 1 ]; then
         [ -f "$PRESET" ] || { echo "Missing $PRESET — run the Waypoint installer first." >&2; exit 1; }
         on_disk luisbocanegra.panel.colorizer || echo "Note: Panel Colorizer is not installed, so the panel will be plain (installer: ./install.sh --apply --panel-colorizer)."
-        PRE="$PRE var WAYPOINT_FANCY = $(cat "$PRESET");"
+        PRE="var WAYPOINT_FANCY = $(cat "$PRESET");"
       fi
       B="$HOME/waypoint-backup-panel-$(date +%Y%m%d-%H%M%S)"; mkdir -p "$B"
       for f in "${FILES[@]}"; do [ -f "$CONF/$f" ] && cp -a "$CONF/$f" "$B/"; done
@@ -132,17 +128,16 @@ if [ "$v" = "panel" ]; then
       for f in "${FILES[@]}"; do [ -f "$B/$f" ] && cp -a "$B/$f" "$CONF/$f"; done
       systemctl --user start plasma-plasmashell.service
       echo "Restored." ;;
-    ""|--fancy|--tasks)
+    ""|--fancy)
       echo "waypoint panel --apply will:"
       echo "  1. back up your panel settings to ~/waypoint-backup-panel-<time>/"
       echo "  2. remove the panel(s) on the TOP edge of your main screen, and any Waypoint panel on other screens"
       echo "     (your other panels are kept)"
-      echo "  3. add a 36 px top panel on your main screen: Launcher | app shortcuts | Clock (centre) | KVitals stats | System Tray"
-      echo "     (app shortcuts = Quick Launch; add --tasks for the task manager with open windows instead)"
+      echo "  3. add a 36 px top panel on your main screen: Launcher | Task Manager | Clock (centre) | KVitals stats | System Tray"
       echo "  With --fancy also: Panel Colorizer's \"Waypoint Fancy\" style (a floating, see-through black bar with"
       echo "  each group on a darker section). Needs the Panel Colorizer widget (./install.sh --apply --panel-colorizer)."
       echo "Undo any time with: waypoint panel --restore" ;;
-    *) echo "usage: waypoint panel [--apply [--fancy] [--tasks]|--restore]" >&2; exit 2 ;;
+    *) echo "usage: waypoint panel [--apply [--fancy]|--restore]" >&2; exit 2 ;;
   esac
   exit 0
 fi
