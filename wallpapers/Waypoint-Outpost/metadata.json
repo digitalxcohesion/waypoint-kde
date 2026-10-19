@@ -1,0 +1,13 @@
+{
+  "KPlugin": {
+    "Id": "Waypoint-Outpost",
+    "Name": "Waypoint — Outpost",
+    "Authors": [
+      {
+        "Name": "DigitalCohesion"
+      }
+    ],
+    "License": "CC-BY-SA-4.0",
+    "Version": "0.2.0"
+  }
+}

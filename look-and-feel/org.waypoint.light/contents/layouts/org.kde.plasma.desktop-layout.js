@@ -47,7 +47,9 @@ function gap(px) {                                                     // fixed 
     g.writeConfig("length", px);
 }
 
-panel.addWidget("org.kde.plasma.kickoff");
+var launcher = panel.addWidget("org.kde.plasma.kickoff");
+launcher.currentConfigGroup = ["General"];
+launcher.writeConfig("icon", "waypoint-launcher");   // the Waypoint logo (installed in Waypoint + hicolor icons)
 gap(GAP);                               // fixed gap between launcher and task manager
 var tasks = panel.addWidget("org.kde.plasma.icontasks");
 tasks.currentConfigGroup = ["General"];

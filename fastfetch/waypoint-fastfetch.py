@@ -11,7 +11,8 @@ Options: --variant dark|light|auto (auto: from KDE's colour scheme, else dark)
 
 What changes (only colour values; layout, modules, logo, keys and formats stay as they are):
   display.color             keys + title = Waypoint amber, separator = steel, output = terminal text
-  logo.color                1 = amber, 2 = terminal text, 3 = steel (repeating up to 9)
+  logo.color                1 = amber, 2 = terminal text, 3 = steel (repeating up to 9);
+                            the Waypoint logo itself (waypoint-logo.txt) keeps its own colours
   modules[].keyColor        amber (only where the module already sets one)
   modules[].outputColor     terminal text (only where already set)
   title module color        user/host amber, @ steel (only where already set)
@@ -314,9 +315,10 @@ def recolour(text, variant):
         if typ is not None and typ.kind == "str" and typ.text in ("none", "kitty", "kitty-direct", "kitty-icat",
                                                                "sixel", "iterm", "chafa", "raw"):
             notes.append(f"logo type '{typ.text}' is a picture or none; its colours were left alone")
+        elif (logo.get("source") is not None and logo.get("source").kind == "str"
+              and "waypoint-logo" in logo.get("source").text):
+            notes.append("Waypoint logo: keeps its own colours (amber chevron, W in the terminal's text colour)")
         else:
-            col = logo.get("color")
-            ind = indent_at(text, col.start if col else (logo.members[0][1] if logo.members else logo.start))
             ed.set_member(logo, "color", jdump(c["logo"]), "logo.color")
     elif logo.kind == "str":
         if logo.text.lower() == "none":
@@ -480,6 +482,7 @@ def main():
         text = base_path.read_text(encoding="utf-8")
         target = found if (found and in_home(found)) else user_dir() / ("config.json5" if base_path.suffix == ".json5" else "config.jsonc")
         origin = f"{base_path} (as you asked)"
+        created = not (found and in_home(found))
     elif found and in_home(found):
         text, target, origin = found.read_text(encoding="utf-8"), found, f"your config {found}"
     elif found:
@@ -492,12 +495,6 @@ def main():
         target = user_dir() / "config.jsonc"
         created = True
 
-    if "waypoint-logo.txt" in text:
-        print("Note: this is the full Waypoint Fastfetch design from an earlier Waypoint release.")
-        backups = sorted(Path.home().glob("waypoint-backup-*/.config/fastfetch/config.jsonc"))
-        if backups:
-            print(f"  Your own earlier config was backed up to {backups[0]}")
-            print(f"  To go back to it (in Waypoint colours):  {sys.argv[0]} --from {backups[0]} --apply")
 
     try:
         new, log, notes = recolour(text, variant)

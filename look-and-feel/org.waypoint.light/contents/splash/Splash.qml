@@ -4,7 +4,7 @@ import QtQuick
 // KSplash sets `stage` from 1 to 6 as the session starts.
 Rectangle {
     id: root
-    color: "#E6E6E6"
+    color: "#0F1217"
     property int stage
 
     onStageChanged: {
@@ -19,22 +19,37 @@ Rectangle {
         opacity: 0
 
         Image {
-            id: mark
-            anchors.centerIn: parent
-            anchors.verticalCenterOffset: -32
-            source: "images/waypoint-mark.svg"
-            sourceSize.width: 160
-            sourceSize.height: 160
+            id: art
+            anchors.fill: parent
+            source: "images/background.jpg"
+            fillMode: Image.PreserveAspectCrop
+            smooth: true
+            asynchronous: false
         }
 
+        // the Waypoint wordmark (logo + "WAYPOINT / LINUX DESKTOP THEME"), sized to the screen
+        Image {
+            id: wordmark
+            source: "images/wordmark.png"
+            fillMode: Image.PreserveAspectFit
+            smooth: true
+            mipmap: true
+            height: Math.round(parent.height * 0.34)
+            width: height * sourceSize.width / Math.max(1, sourceSize.height)
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.verticalCenterOffset: -Math.round(parent.height * 0.03)
+        }
+
+        // progress line under the wordmark
         Rectangle {
             id: track
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.top: mark.bottom
-            anchors.topMargin: 40
-            width: 264
+            width: Math.round(wordmark.width * 0.42)
             height: 2
-            color: "#B8BEC6"
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.top: wordmark.bottom
+            anchors.topMargin: Math.round(parent.height * 0.04)
+            color: Qt.rgba(1, 1, 1, 0.22)          // light track: visible on any part of the picture
 
             Rectangle {
                 anchors.left: parent.left
@@ -46,16 +61,6 @@ Rectangle {
                     NumberAnimation { duration: 450; easing.type: Easing.OutCubic }
                 }
             }
-        }
-
-        Text {
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.top: track.bottom
-            anchors.topMargin: 20
-            text: "WAYPOINT"
-            color: "#667085"
-            font.pixelSize: 12
-            font.letterSpacing: 8
         }
     }
 

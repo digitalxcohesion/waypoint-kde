@@ -5,6 +5,10 @@
 #   ./install-fastfetch-colours.sh            preview: show what would change (changes nothing)
 #   ./install-fastfetch-colours.sh --apply    recolour your Fastfetch config (original kept)
 #   ./install-fastfetch-colours.sh --restore  put your original Fastfetch config back
+#   ./install-fastfetch-colours.sh --design --apply
+#                                             optional: use the Waypoint Fastfetch design instead
+#                                             (Waypoint logo + module list); your config is kept
+#                                             and comes back with --restore
 # Options:  --dark | --light   palette to use (default: follows KDE's colour scheme, else dark)
 #           --yes              install missing Fastfetch/Python without asking (uses sudo)
 #           --quiet            no diff, just the summary
@@ -19,16 +23,17 @@ TOOL="$HERE/waypoint-fastfetch.py"
 DATA="${XDG_DATA_HOME:-$HOME/.local/share}"
 DEST="$DATA/waypoint/waypoint-fastfetch.py"
 
-APPLY=0; RESTORE=0; YES=0; VARIANT=auto; Q=""
+APPLY=0; RESTORE=0; YES=0; DESIGN=0; VARIANT=auto; Q=""
 for arg in "$@"; do
   case "$arg" in
     --apply) APPLY=1 ;;
     --restore) RESTORE=1 ;;
+    --design) DESIGN=1 ;;
     --dark) VARIANT=dark ;;
     --light) VARIANT=light ;;
     --yes|-y) YES=1 ;;
     --quiet|-q) Q=--quiet ;;
-    -h|--help) sed -n '2,16p' "$SELF" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    -h|--help) sed -n '2,20p' "$SELF" | sed 's/^# \{0,1\}//'; exit 0 ;;
     *) echo "unknown option: $arg  (see --help)" >&2; exit 2 ;;
   esac
 done
@@ -97,14 +102,34 @@ fi
 need fastfetch fastfetch "the system-info tool these colours are for" || \
   echo "  Continuing: the colours are set up now and Fastfetch will use them once it is installed."
 
+FROM=""
+if [ $DESIGN = 1 ]; then
+  # the optional Waypoint design: config + logo from this folder; the logo path is written for
+  # this user's config folder. The recolour step below backs up the current config first.
+  [ -f "$HERE/design/config.jsonc" ] && [ -f "$HERE/design/waypoint-logo.txt" ] || \
+    { echo "design/ files not found next to this script" >&2; exit 1; }
+  CONF="${XDG_CONFIG_HOME:-$HOME/.config}/fastfetch"
+  TMPD=$(mktemp -d); trap 'rm -rf "$TMPD"' EXIT
+  sed "s|~/.config/fastfetch/waypoint-logo.txt|$CONF/waypoint-logo.txt|" "$HERE/design/config.jsonc" > "$TMPD/config.jsonc"
+  FROM="--from $TMPD/config.jsonc"
+  echo "Waypoint design: logo -> $CONF/waypoint-logo.txt"
+  if [ $APPLY = 1 ]; then
+    mkdir -p "$CONF"
+    if [ -f "$CONF/waypoint-logo.txt" ] && ! cmp -s "$HERE/design/waypoint-logo.txt" "$CONF/waypoint-logo.txt"; then
+      cp "$CONF/waypoint-logo.txt" "$CONF/waypoint-logo.txt.waypoint-previous"
+    fi
+    cp "$HERE/design/waypoint-logo.txt" "$CONF/waypoint-logo.txt"
+  fi
+fi
+
 if [ $APPLY = 1 ]; then
   # keep a copy where `waypoint dark|light` can find it, so switching keeps Fastfetch in step
   if [ "$TOOL" != "$DEST" ]; then
     mkdir -p "$(dirname "$DEST")"; cp "$TOOL" "$DEST"; chmod 755 "$DEST"
   fi
-  python3 -I "$DEST" --apply --variant "$VARIANT" $Q
+  python3 -I "$DEST" --apply --variant "$VARIANT" $Q $FROM
   echo "Run  fastfetch  to see it. Undo:  $0 --restore"
 else
-  python3 -I "$TOOL" --variant "$VARIANT" $Q
-  echo "Preview only. Run  $0 --apply  to recolour."
+  python3 -I "$TOOL" --variant "$VARIANT" $Q $FROM
+  echo "Preview only. Add  --apply  to write it."
 fi

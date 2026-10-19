@@ -14,7 +14,8 @@ Install scripts, `waypoint`, Fastfetch
   colour tool, panel scripts, Panel
   Colorizer presets                    original work                       GPL-3.0-or-later
 Plasma Styles (plasma/desktoptheme)    KDE Breeze Plasma Style             LGPL-2.0-or-later
-Folder icons (icons/Waypoint)          KDE Breeze icons                    LGPL-3.0-or-later
+Icons (icons/Waypoint)                 KDE Breeze icons                    LGPL-3.0-or-later
+  Dolphin app icon (org.kde.dolphin)   KDE Dolphin's icon                  LGPL-3.0
 Cursors                                KDE Breeze cursors                  GPL-2.0-or-later
                                                                            (licence text in each
                                                                            cursor folder: COPYING)
@@ -22,6 +23,13 @@ Kvantum style                          Kvantum KvArc / KvArcDark           GPL-3
                                        by Pedram Pourang (Tsu Jan)         (licence text in each
                                                                            Kvantum folder: COPYING)
 Wallpaper "Crescent"                   original artwork (AI-assisted)      CC BY-SA 4.0
+Wallpaper "Outpost", splash artwork    Waypoint brand artwork (AI-assisted) CC BY-SA 4.0
+Waypoint logo icons, Fastfetch logo    Waypoint logo                       GPL-3.0-or-later
+
+The Waypoint name and logo (the amber chevron over the W, and the "WAYPOINT / LINUX DESKTOP
+THEME" wordmark) identify this theme and are (C) 2026 DigitalCohesion. The licences above cover
+the files; they do not grant permission to use the Waypoint name or logo to identify other
+products. Modified versions should use their own name and logo.
 
 Breeze is part of KDE Plasma, (C) the KDE Visual Design Group and contributors.
 Kvantum and KvArc: https://github.com/tsujan/Kvantum

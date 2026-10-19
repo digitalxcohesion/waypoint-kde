@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.2.0
+- Waypoint brand: the Waypoint logo is the panel's launcher icon, and a Waypoint app icon (dark and
+  light tile, 32–512 px) is included, also in the hicolor theme so it shows with other icon themes
+- New splash screen: the Outpost artwork with the Waypoint wordmark and an amber progress line
+- New wallpaper "Outpost" in Dark (dusk) and Light (overcast morning), no logo, up to 3840×2160
+  and ultrawide; Plasma picks the version that matches the colour scheme. Crescent stays the default
+- Optional Waypoint Fastfetch design with the Waypoint logo (`--fastfetch-design`, or the
+  installer asks; default no). Your own config is backed up and `--restore` brings it back
+- Icons: grey Waypoint versions of the Dolphin, System Settings, Desktop and Home icons, which were
+  drawn in the amber accent/highlight colour (Dolphin and System Settings in the panel, the Home
+  folder) or as a colourful picture (the Desktop folder)
+
 ## 0.1.2
 - Kvantum: "Transparent Dolphin view" is on by default (Dolphin's file view is translucent too)
 

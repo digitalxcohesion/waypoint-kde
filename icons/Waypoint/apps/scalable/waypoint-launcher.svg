@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="9.76 9.76 340.48 340.48">
+  <!-- Waypoint launcher icon. W follows the colour scheme's text colour; chevron is the logo amber. -->
+  <style type="text/css" id="current-color-scheme">.ColorScheme-Text { color:#9AA6B2; }</style>
+  <path d="M28 112 L96 330 L180 145 L264 330 L332 112 L292 112 L264 250 L180 102 L96 250 L68 112 Z" class="ColorScheme-Text" style="fill:currentColor"/>
+  <path d="M120 166 L180 30 L240 166 L211 166 L180 96 L149 166 Z" style="fill:#D69A50"/>
+</svg>

@@ -3,6 +3,6 @@ Type=Application
 Name=Waypoint sync
 Comment=Keeps the Kvantum style, Konsole profile and Fastfetch colours in step when you pick Waypoint Dark or Light
 Exec=sh -c 'exec "$HOME/.local/bin/waypoint" watch'
-Icon=preferences-desktop-theme-global
+Icon=waypoint
 OnlyShowIn=KDE;
 X-KDE-autostart-phase=2

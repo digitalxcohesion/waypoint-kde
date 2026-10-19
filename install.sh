@@ -15,12 +15,16 @@
 #                           in step when you pick Waypoint Dark/Light in System Settings
 #   --no-fastfetch          leave Fastfetch alone (otherwise its colours are set to Waypoint's;
 #                           your Fastfetch design is kept, undo: fastfetch/install-fastfetch-colours.sh --restore)
+#   --fastfetch-design      optional: use the Waypoint Fastfetch design (Waypoint logo + module list)
+#                           instead of only recolouring yours. Your config is backed up first and
+#                           comes back with fastfetch/install-fastfetch-colours.sh --restore.
+#                           Without this flag the installer asks (default: no).
 # Every existing item it replaces is moved to ~/waypoint-backup-<timestamp>/ first.
 set -euo pipefail
 SELF="$(readlink -f "$0")"
 cd "$(dirname "$SELF")"
 
-APPLY=0; WANT_KV=0; WANT_PANEL=0; NO_PANEL=0; NO_FF=0; WANT_PC=0; NO_SYNC=0
+APPLY=0; WANT_KV=0; WANT_PANEL=0; NO_PANEL=0; NO_FF=0; WANT_PC=0; NO_SYNC=0; FF_DESIGN=0
 for arg in "$@"; do
   case "$arg" in
     --apply) APPLY=1 ;;
@@ -28,9 +32,10 @@ for arg in "$@"; do
     --panel) WANT_PANEL=1 ;;
     --no-panel) NO_PANEL=1 ;;
     --no-fastfetch) NO_FF=1 ;;
+    --fastfetch-design) FF_DESIGN=1 ;;
     --no-autosync) NO_SYNC=1 ;;
     --panel-colorizer) WANT_PC=1; WANT_PANEL=1 ;;
-    -h|--help) sed -n '2,19p' "$SELF" | sed 's/^# //; s/^#$//'; exit 0 ;;
+    -h|--help) sed -n '2,23p' "$SELF" | sed 's/^# //; s/^#$//'; exit 0 ;;
     *) echo "unknown option: $arg  (see ./install.sh --help)" >&2; exit 2 ;;
   esac
 done
@@ -80,6 +85,7 @@ ITEMS=(
   "cursors/Waypoint-Cursors-Dark|$DATA/icons"
   "cursors/Waypoint-Cursors-Light|$DATA/icons"
   "wallpapers/Waypoint-Crescent|$DATA/wallpapers"
+  "wallpapers/Waypoint-Outpost|$DATA/wallpapers"
   "look-and-feel/org.waypoint.dark|$DATA/plasma/look-and-feel"
   "look-and-feel/org.waypoint.light|$DATA/plasma/look-and-feel"
   "konsole/WaypointDark.colorscheme|$DATA/konsole"
@@ -95,6 +101,11 @@ ITEMS=(
   "panel-colorizer/Waypoint Cards|$CONF/panel-colorizer/presets"
   "panel-colorizer/Waypoint Islands|$CONF/panel-colorizer/presets"
 )
+# the Waypoint logo also goes into the standard fallback icon theme (hicolor), so the launcher and
+# app icon still show when another icon theme is in use. Only these files; hicolor is shared.
+while IFS= read -r f; do
+  ITEMS+=("$f|$DATA/icons/$(dirname "$f")")
+done < <(cd . && find hicolor -type f | sort)
 # login helper: switches Kvantum/Konsole/Fastfetch when the colour scheme changes to Waypoint's
 [ $NO_SYNC = 0 ] && ITEMS+=("autostart/waypoint-sync.desktop|$CONF/autostart")
 
@@ -146,10 +157,17 @@ echo
 if [ $NO_FF = 1 ]; then
   echo "Fastfetch: left alone (--no-fastfetch)."
 elif [ $APPLY = 1 ]; then
-  echo "Fastfetch colours:"
-  sh fastfetch/install-fastfetch-colours.sh --apply --quiet || echo "  Fastfetch step failed; run fastfetch/install-fastfetch-colours.sh --apply later."
+  # optional Waypoint design: only with --fastfetch-design or a "yes" here (default no)
+  if [ $FF_DESIGN = 0 ] && command -v fastfetch >/dev/null 2>&1 && \
+     ask_no "Fastfetch: use the Waypoint design (Waypoint logo)? Your own config is backed up. (No = keep your design, Waypoint colours only)"; then
+    FF_DESIGN=1
+  fi
+  DESIGNARG=""; [ $FF_DESIGN = 1 ] && DESIGNARG="--design"
+  echo "Fastfetch $([ $FF_DESIGN = 1 ] && echo 'design (Waypoint logo)' || echo colours):"
+  sh fastfetch/install-fastfetch-colours.sh --apply --quiet $DESIGNARG || echo "  Fastfetch step failed; run fastfetch/install-fastfetch-colours.sh --apply $DESIGNARG later."
 else
-  sh fastfetch/install-fastfetch-colours.sh --quiet | sed 's/^/  /' || true
+  sh fastfetch/install-fastfetch-colours.sh --quiet $( [ $FF_DESIGN = 1 ] && echo --design ) | sed 's/^/  /' || true
+  [ $FF_DESIGN = 0 ] && echo "  (Optional: --fastfetch-design uses the Waypoint logo design instead; the installer also asks.)"
 fi
 
 echo
